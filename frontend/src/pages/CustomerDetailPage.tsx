@@ -352,7 +352,7 @@ export default function CustomerDetailPage() {
           <div className="px-6 py-5">
             <ol className="relative border-l border-gray-200 space-y-6">
               {visits.map((visit) => (
-                <li key={visit._id} className="ml-5">
+                <li key={visit.id} className="ml-5">
                   <span className="absolute -left-2 mt-0.5">
                     <StatusIcon status={visit.status} />
                   </span>
@@ -396,7 +396,7 @@ export default function CustomerDetailPage() {
       {/* Loyalty modal */}
       {loyaltyModalOpen && customer && (
         <LoyaltyModal
-          customerId={customer._id}
+          customerId={customer.id}
           currentPoints={customer.loyaltyPoints ?? 0}
           onClose={() => setLoyaltyModalOpen(false)}
         />

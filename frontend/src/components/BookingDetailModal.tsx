@@ -133,7 +133,7 @@ export default function BookingDetailModal({
     if (!window.confirm('Cancel this appointment?')) return;
     setActionError('');
     try {
-      await cancelBooking.mutateAsync(booking._id);
+      await cancelBooking.mutateAsync(booking.id);
       onClose();
     } catch {
       setActionError('Failed to cancel booking.');
@@ -144,7 +144,7 @@ export default function BookingDetailModal({
     if (!booking) return;
     setActionError('');
     try {
-      await completeBooking.mutateAsync({ id: booking._id, paymentMethod });
+      await completeBooking.mutateAsync({ id: booking.id, paymentMethod });
       setShowPaymentPicker(false);
       onClose();
     } catch {
@@ -224,8 +224,8 @@ export default function BookingDetailModal({
               label="Services"
               value={
                 <div className="space-y-1 mt-1">
-                  {(booking.services ?? []).map((svc) => (
-                    <div key={svc._id} className="flex items-center justify-between">
+                  {[booking.service].filter(Boolean).map((svc) => (
+                    <div key={svc!.id} className="flex items-center justify-between">
                       <span className="text-sm text-gray-700">{svc.name}</span>
                       <span className="text-sm text-gray-500">${svc.price}</span>
                     </div>

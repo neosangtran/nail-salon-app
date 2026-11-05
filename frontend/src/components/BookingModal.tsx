@@ -8,14 +8,14 @@ import { useCreateBooking, useUpdateBooking, type Booking, type UpdateBookingPay
 // ─── Static service list (seed data) ─────────────────────────────────────────
 
 export const SERVICES = [
-  { _id: 'svc-001', name: 'Classic Manicure',   duration: 30,  price: 25  },
-  { _id: 'svc-002', name: 'Gel Manicure',        duration: 45,  price: 40  },
-  { _id: 'svc-003', name: 'Classic Pedicure',    duration: 45,  price: 35  },
-  { _id: 'svc-004', name: 'Gel Pedicure',        duration: 60,  price: 55  },
-  { _id: 'svc-005', name: 'Acrylic Full Set',    duration: 90,  price: 65  },
-  { _id: 'svc-006', name: 'Acrylic Fill',        duration: 60,  price: 45  },
-  { _id: 'svc-007', name: 'Nail Art (per nail)', duration: 15,  price: 5   },
-  { _id: 'svc-008', name: 'Dip Powder Manicure', duration: 60,  price: 50  },
+  { id:'svc-001', name: 'Classic Manicure',   duration: 30,  price: 25  },
+  { id:'svc-002', name: 'Gel Manicure',        duration: 45,  price: 40  },
+  { id:'svc-003', name: 'Classic Pedicure',    duration: 45,  price: 35  },
+  { id:'svc-004', name: 'Gel Pedicure',        duration: 60,  price: 55  },
+  { id:'svc-005', name: 'Acrylic Full Set',    duration: 90,  price: 65  },
+  { id:'svc-006', name: 'Acrylic Fill',        duration: 60,  price: 45  },
+  { id:'svc-007', name: 'Nail Art (per nail)', duration: 15,  price: 5   },
+  { id:'svc-008', name: 'Dip Powder Manicure', duration: 60,  price: 50  },
 ];
 
 // ─── Time slot helpers ────────────────────────────────────────────────────────
@@ -55,7 +55,7 @@ function displayTime(time24: string): string {
 // ─── Customer search ──────────────────────────────────────────────────────────
 
 interface Customer {
-  _id: string;
+  id: string;
   name: string;
   phone?: string;
   email?: string;
@@ -67,7 +67,7 @@ interface CustomersResponse {
 }
 
 interface StaffMember {
-  _id: string;
+  id: string;
   name: string;
   specialization?: string;
   isActive: boolean;
@@ -119,8 +119,8 @@ export default function BookingModal({
     if (existingBooking) {
       setSelectedCustomer(existingBooking.customer as Customer);
       setCustomerSearch(existingBooking.customer?.name ?? '');
-      setSelectedStaffId(existingBooking.staff?._id ?? '');
-      setSelectedServiceIds(existingBooking.services?.map((s) => s._id) ?? []);
+      setSelectedStaffId(existingBooking.staff?.id ?? '');
+      setSelectedServiceIds(existingBooking.serviceId ? [existingBooking.serviceId] : []);
       setDate(existingBooking.date ?? '');
       setStartTime(existingBooking.startTime ?? '10:00');
       setNotes(existingBooking.notes ?? '');
@@ -167,12 +167,12 @@ export default function BookingModal({
 
   // Computed total duration + end time
   const totalDuration = selectedServiceIds.reduce((sum, id) => {
-    const svc = SERVICES.find((s) => s._id === id);
+    const svc = SERVICES.find((s) => s.id === id);
     return sum + (svc?.duration ?? 0);
   }, 0);
   const endTime = totalDuration > 0 ? calcEndTime(startTime, totalDuration) : '';
   const totalPrice = selectedServiceIds.reduce((sum, id) => {
-    const svc = SERVICES.find((s) => s._id === id);
+    const svc = SERVICES.find((s) => s.id === id);
     return sum + (svc?.price ?? 0);
   }, 0);
 
@@ -206,17 +206,17 @@ export default function BookingModal({
     try {
       if (isEditing && existingBooking) {
         const payload: UpdateBookingPayload = {
-          customerId: selectedCustomer._id,
+          customerId: selectedCustomer.id,
           staffId: selectedStaffId,
           serviceIds: selectedServiceIds,
           date,
           startTime,
           notes: notes || undefined,
         };
-        await updateBooking.mutateAsync({ id: existingBooking._id, payload });
+        await updateBooking.mutateAsync({ id: existingBooking.id, payload });
       } else {
         await createBooking.mutateAsync({
-          customerId: selectedCustomer._id,
+          customerId: selectedCustomer.id,
           staffId: selectedStaffId,
           serviceIds: selectedServiceIds,
           date,
@@ -302,7 +302,7 @@ export default function BookingModal({
                 ) : (
                   customers.map((c) => (
                     <button
-                      key={c._id}
+                      key={c.id}
                       type="button"
                       className="w-full text-left px-4 py-2.5 hover:bg-primary-50 transition-colors border-b border-gray-50 last:border-0"
                       onClick={() => {
@@ -345,7 +345,7 @@ export default function BookingModal({
             >
               <option value="">Select staff…</option>
               {staffList.map((s) => (
-                <option key={s._id} value={s._id}>
+                <option key={s.id} value={s.id}>
                   {s.name}{s.specialization ? ` — ${s.specialization}` : ''}
                 </option>
               ))}
@@ -362,12 +362,12 @@ export default function BookingModal({
             </label>
             <div className="grid grid-cols-2 gap-2">
               {SERVICES.map((svc) => {
-                const checked = selectedServiceIds.includes(svc._id);
+                const checked = selectedServiceIds.includes(svc.id);
                 return (
                   <button
-                    key={svc._id}
+                    key={svc.id}
                     type="button"
-                    onClick={() => handleServiceToggle(svc._id)}
+                    onClick={() => handleServiceToggle(svc.id)}
                     className={`text-left px-3 py-2.5 rounded-lg border text-sm transition-all ${
                       checked
                         ? 'border-primary-400 bg-primary-50 text-primary-800'

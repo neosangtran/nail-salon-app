@@ -192,7 +192,7 @@ export default function StaffDetailPage() {
                   <div>
                     <h1 className="text-2xl font-bold text-gray-800">{staff?.name}</h1>
                     <div className="flex items-center gap-2 mt-1">
-                      {roleBadge(staff?.role ?? '')}
+                      {roleBadge(staff?.user?.role ?? '')}
                       <span
                         className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                           staff?.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
@@ -301,7 +301,7 @@ export default function StaffDetailPage() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {stats.recentAppointments.map((appt) => (
-                  <tr key={appt._id} className="hover:bg-rose-50/30 transition-colors">
+                  <tr key={appt.id} className="hover:bg-rose-50/30 transition-colors">
                     <td className="px-6 py-3 text-gray-700 whitespace-nowrap">
                       {formatDateShort(appt.date)}
                       {appt.startTime && (

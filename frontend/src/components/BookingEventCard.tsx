@@ -62,9 +62,8 @@ export default function BookingEventCard({
   const isCancelled = booking.status === 'cancelled';
   const isCompleted = booking.status === 'completed';
   const customerName = booking.customer?.name ?? 'Unknown';
-  const serviceName =
-    booking.services?.[0]?.name ?? 'Service';
-  const extraServices = (booking.services?.length ?? 0) - 1;
+  const serviceName = booking.service?.name ?? 'Service';
+  const extraServices = 0;
 
   if (isCancelled) {
     return (

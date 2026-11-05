@@ -82,10 +82,10 @@ function bookingToEvent(booking: Booking): CalendarEvent {
     : new Date(start.getTime() + 60 * 60 * 1000); // default 1h
 
   const customerName = booking.customer?.name ?? 'Unknown';
-  const serviceName  = booking.services?.[0]?.name ?? 'Service';
+  const serviceName  = booking.service?.name ?? 'Service';
 
   return {
-    id: booking._id,
+    id: booking.id,
     title: `${customerName} — ${serviceName}`,
     start,
     end,
@@ -98,7 +98,7 @@ function buildStaffColorMap(bookings: Booking[]): Map<string, number> {
   const map = new Map<string, number>();
   let idx = 0;
   for (const b of bookings) {
-    const sid = b.staff?._id;
+    const sid = b.staff?.id;
     if (sid && !map.has(sid)) {
       map.set(sid, idx % 8);
       idx++;
@@ -154,7 +154,7 @@ export default function BookingsPage() {
   }, [view, currentDate]);
 
   const bookingsQuery = useBookings({ startDate, endDate, limit: 200 });
-  const bookings: Booking[] = bookingsQuery.data?.bookings ?? [];
+  const bookings: Booking[] = bookingsQuery.data?.appointments ?? [];
 
   // Build staff color map
   const staffColorMap = useMemo(() => buildStaffColorMap(bookings), [bookings]);
@@ -231,7 +231,7 @@ export default function BookingsPage() {
   const EventComponent = useCallback(
     ({ event }: EventProps<CalendarEvent>) => {
       const booking = event.resource;
-      const staffId = booking.staff?._id ?? '';
+      const staffId = booking.staff?.id ?? '';
       const colorIdx = staffColorMap.get(staffId) ?? getStaffColorIndex(staffId);
       return (
         <BookingEventCard
@@ -249,7 +249,7 @@ export default function BookingsPage() {
   const eventStyleGetter = useCallback(
     (event: CalendarEvent) => {
       const booking = event.resource;
-      const staffId = booking.staff?._id ?? '';
+      const staffId = booking.staff?.id ?? '';
       void (staffColorMap.get(staffId) ?? getStaffColorIndex(staffId));
       const isCancelled = booking.status === 'cancelled';
 
@@ -272,11 +272,11 @@ export default function BookingsPage() {
   const staffLegend = useMemo(() => {
     const entries: { staffId: string; name: string; colorIdx: number }[] = [];
     for (const b of bookings) {
-      if (b.staff?._id && !entries.find((e) => e.staffId === b.staff._id)) {
+      if (b.staff?.id && !entries.find((e) => e.staffId === b.staff.id)) {
         entries.push({
-          staffId: b.staff._id,
+          staffId: b.staff.id,
           name: b.staff.name,
-          colorIdx: staffColorMap.get(b.staff._id) ?? 0,
+          colorIdx: staffColorMap.get(b.staff.id) ?? 0,
         });
       }
     }
