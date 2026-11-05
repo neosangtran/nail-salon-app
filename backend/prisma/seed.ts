@@ -18,6 +18,12 @@ function setTime(date: Date, hour: number, minute: number = 0): Date {
 async function main() {
   console.log('Seeding database...');
 
+  const existing = await prisma.user.count();
+  if (existing > 0) {
+    console.log('Database already seeded, skipping.');
+    return;
+  }
+
   const hashedAdmin = await bcrypt.hash('Admin123!', 10);
   const hashedStaff = await bcrypt.hash('Staff123!', 10);
 
