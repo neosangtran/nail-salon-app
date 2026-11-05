@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Role: ADMIN | MANAGER | STAFF
+// AppointmentStatus: PENDING | CONFIRMED | COMPLETED | CANCELLED
+// PaymentMethod: CASH | CARD | GIFT_CERTIFICATE | MIXED
+// PaymentStatus: UNPAID | PAID | PARTIAL
+// RevenueType: SERVICE | GIFT_CERT_PURCHASE | TIP | OTHER
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      String   @default("STAFF")
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  staff     Staff?
+}
+
+model Staff {
+  id             String        @id @default(cuid())
+  userId         String        @unique
+  user           User          @relation(fields: [userId], references: [id])
+  name           String
+  phone          String?
+  email          String?
+  hireDate       DateTime
+  specialization String?
+  photoUrl       String?
+  commissionRate Float         @default(0.4)
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  appointments   Appointment[]
+  commissions    Commission[]
+}
+
+model Customer {
+  id            String        @id @default(cuid())
+  name          String
+  phone         String?
+  email         String?
+  birthday      DateTime?
+  notes         String?
+  loyaltyPoints Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  appointments  Appointment[]
+}
+
+model Service {
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  duration     Int
+  price        Float
+  category     String
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  appointments Appointment[]
+}
+
+model Appointment {
+  id            String        @id @default(cuid())
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  staffId       String
+  staff         Staff         @relation(fields: [staffId], references: [id])
+  serviceId     String
+  service       Service       @relation(fields: [serviceId], references: [id])
+  date          DateTime
+  startTime     DateTime
+  endTime       DateTime
+  status        String        @default("PENDING")
+  notes         String?
+  totalPrice    Float
+  tip           Float         @default(0)
+  paymentMethod String?
+  paymentStatus String        @default("UNPAID")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  commissions   Commission[]
+  revenue       Revenue[]
+}
+
+model Supply {
+  id            String    @id @default(cuid())
+  name          String
+  category      String
+  quantity      Float
+  unit          String
+  reorderLevel  Float
+  costPerUnit   Float
+  supplier      String?
+  lastRestocked DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model GiftCertificate {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  originalAmount   Float
+  remainingBalance Float
+  purchaserName    String?
+  purchaserEmail   String?
+  recipientName    String?
+  purchasedAt      DateTime @default(now())
+  expiresAt        DateTime
+  isActive         Boolean  @default(true)
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Commission {
+  id            String      @id @default(cuid())
+  staffId       String
+  staff         Staff       @relation(fields: [staffId], references: [id])
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  amount        Float
+  rate          Float
+  period        String
+  isPaid        Boolean     @default(false)
+  paidAt        DateTime?
+  createdAt     DateTime    @default(now())
+}
+
+model Revenue {
+  id            String       @id @default(cuid())
+  date          DateTime     @default(now())
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  amount        Float
+  type          String
+  paymentMethod String
+  notes         String?
+  createdAt     DateTime     @default(now())
+}
