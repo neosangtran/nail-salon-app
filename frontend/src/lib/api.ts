@@ -5,7 +5,7 @@ const REFRESH_TOKEN_KEY = 'nail_salon_refresh_token';
 
 // Create the base axios instance
 const api: AxiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL ?? '/api',
   headers: {
     'Content-Type': 'application/json',
   },
