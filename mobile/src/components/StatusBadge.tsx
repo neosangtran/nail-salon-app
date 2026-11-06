@@ -5,7 +5,7 @@ type StatusType = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no-show
 
 interface StatusBadgeProps {
   // API values may be upper-case (e.g. "PENDING"); they are matched case-insensitively.
-  status: StatusType | string;
+  status: StatusType | string | undefined;
   label?: string;
 }
 
@@ -23,8 +23,9 @@ const STATUS_COLORS: Record<StatusType, { bg: string; text: string }> = {
 };
 
 export default function StatusBadge({ status, label }: StatusBadgeProps) {
-  const key = status.toLowerCase().replace(/_/g, '-') as StatusType;
+  const key = (status ?? '').toLowerCase().replace(/_/g, '-') as StatusType;
   const colors = STATUS_COLORS[key] ?? { bg: '#f3f4f6', text: '#374151' };
+  if (!key && !label) return null;
   const displayLabel = label ?? key.charAt(0).toUpperCase() + key.slice(1);
 
   return (
