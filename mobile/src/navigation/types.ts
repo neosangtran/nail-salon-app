@@ -30,13 +30,21 @@ export type StaffStackParamList = {
 export type CustomerStackParamList = {
   CustomerList: undefined;
   CustomerDetail: { customerId: string };
+  CustomerForm: { customerId?: string } | undefined;
+};
+
+// ─── Booking Stack ────────────────────────────────────────────────────────────
+
+export type BookingStackParamList = {
+  BookingList: undefined;
+  BookingForm: { bookingId?: string } | undefined;
 };
 
 // ─── App Tabs ─────────────────────────────────────────────────────────────────
 
 export type AppTabsParamList = {
   Dashboard: undefined;
-  Bookings: undefined;
+  Bookings: { screen?: keyof BookingStackParamList; params?: BookingStackParamList[keyof BookingStackParamList] };
   Staff: { screen?: keyof StaffStackParamList; params?: StaffStackParamList[keyof StaffStackParamList] };
   Customers: { screen?: keyof CustomerStackParamList; params?: CustomerStackParamList[keyof CustomerStackParamList] };
   More: { screen?: keyof MoreStackParamList; params?: MoreStackParamList[keyof MoreStackParamList] };
@@ -62,6 +70,15 @@ export type CustomerDetailScreenProps = NativeStackScreenProps<
   CustomerStackParamList,
   'CustomerDetail'
 >;
+
+export type CustomerFormScreenProps = NativeStackScreenProps<CustomerStackParamList, 'CustomerForm'>;
+
+export type BookingListScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<BookingStackParamList, 'BookingList'>,
+  BottomTabScreenProps<AppTabsParamList>
+>;
+
+export type BookingFormScreenProps = NativeStackScreenProps<BookingStackParamList, 'BookingForm'>;
 
 export type MoreStackScreenProps<T extends keyof MoreStackParamList> = NativeStackScreenProps<
   MoreStackParamList,

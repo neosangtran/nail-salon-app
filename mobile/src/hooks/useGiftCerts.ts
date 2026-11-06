@@ -15,6 +15,8 @@ export interface GiftCert {
   remainingBalance: number;
   notes?: string;
   expiresAt?: string;
+  isActive?: boolean;
+  // Not stored by the API; derived from isActive, balance and expiry.
   status: GiftCertStatus;
   createdAt?: string;
   updatedAt?: string;
@@ -75,17 +77,27 @@ export const giftCertKeys = {
 
 // ─── Hooks ───────────────────────────────────────────────────────────────────
 
+function deriveGiftCertStatus(c: Pick<GiftCert, 'isActive' | 'remainingBalance' | 'expiresAt'>): GiftCertStatus {
+  if (c.expiresAt && new Date(c.expiresAt).getTime() < Date.now()) return 'expired';
+  if (c.isActive === false || c.remainingBalance <= 0) return 'depleted';
+  return 'active';
+}
+
 export function useGiftCerts(params?: GiftCertListParams) {
   return useQuery({
     queryKey: giftCertKeys.list(params),
     queryFn: async (): Promise<GiftCertListResponse> => {
       const queryParams = new URLSearchParams();
       if (params?.search) queryParams.set('search', params.search);
-      if (params?.status) queryParams.set('status', params.status);
       if (params?.page !== undefined) queryParams.set('page', String(params.page));
       if (params?.limit !== undefined) queryParams.set('limit', String(params.limit));
       const res = await api.get<GiftCertListResponse>(`/gift-certs?${queryParams.toString()}`);
-      return res.data;
+      // The API has no status filter, so status is derived and filtered here.
+      const certs = res.data.giftCertificates.map((c) => ({ ...c, status: deriveGiftCertStatus(c) }));
+      return {
+        ...res.data,
+        giftCertificates: params?.status ? certs.filter((c) => c.status === params.status) : certs,
+      };
     },
     placeholderData: (prev) => prev,
   });

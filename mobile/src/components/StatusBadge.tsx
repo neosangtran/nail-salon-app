@@ -4,7 +4,8 @@ import { View, Text, StyleSheet } from 'react-native';
 type StatusType = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no-show' | 'active' | 'depleted' | 'expired' | 'paid' | 'unpaid';
 
 interface StatusBadgeProps {
-  status: StatusType;
+  // API values may be upper-case (e.g. "PENDING"); they are matched case-insensitively.
+  status: StatusType | string | undefined;
   label?: string;
 }
 
@@ -22,8 +23,10 @@ const STATUS_COLORS: Record<StatusType, { bg: string; text: string }> = {
 };
 
 export default function StatusBadge({ status, label }: StatusBadgeProps) {
-  const colors = STATUS_COLORS[status] ?? { bg: '#f3f4f6', text: '#374151' };
-  const displayLabel = label ?? status.charAt(0).toUpperCase() + status.slice(1);
+  const key = (status ?? '').toLowerCase().replace(/_/g, '-') as StatusType;
+  const colors = STATUS_COLORS[key] ?? { bg: '#f3f4f6', text: '#374151' };
+  if (!key && !label) return null;
+  const displayLabel = label ?? key.charAt(0).toUpperCase() + key.slice(1);
 
   return (
     <View style={[styles.badge, { backgroundColor: colors.bg }]}>

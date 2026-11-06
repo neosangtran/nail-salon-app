@@ -22,8 +22,8 @@ export interface CustomerVisit {
   startTime?: string;
   status: string;
   totalPrice: number;
-  services?: string[];
-  staff?: { id: string; name: string };
+  serviceName?: string;
+  staffName?: string;
 }
 
 export interface CustomerPagination {
@@ -40,7 +40,7 @@ export interface CustomerListResponse {
 
 export interface CustomerVisitsResponse {
   visits: CustomerVisit[];
-  total: number;
+  pagination: CustomerPagination;
 }
 
 export interface CustomerListParams {
@@ -59,6 +59,7 @@ export interface CreateCustomerPayload {
   notes?: string;
 }
 
+// Empty strings clear a field on the API side.
 export interface UpdateCustomerPayload {
   name?: string;
   phone?: string;
@@ -100,8 +101,8 @@ export function useCustomers(params?: CustomerListParams) {
 export function useCustomer(id: string) {
   return useQuery({
     queryKey: customerKeys.detail(id),
-    queryFn: async (): Promise<{ customer: Customer }> => {
-      const res = await api.get<{ customer: Customer }>(`/customers/${id}`);
+    queryFn: async (): Promise<Customer> => {
+      const res = await api.get<Customer>(`/customers/${id}`);
       return res.data;
     },
     enabled: !!id,
@@ -112,8 +113,8 @@ export function useCreateCustomer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: CreateCustomerPayload): Promise<Customer> => {
-      const res = await api.post<{ customer: Customer }>('/customers', payload);
-      return res.data.customer;
+      const res = await api.post<Customer>('/customers', payload);
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
@@ -131,8 +132,8 @@ export function useUpdateCustomer() {
       id: string;
       payload: UpdateCustomerPayload;
     }): Promise<Customer> => {
-      const res = await api.put<{ customer: Customer }>(`/customers/${id}`, payload);
-      return res.data.customer;
+      const res = await api.put<Customer>(`/customers/${id}`, payload);
+      return res.data;
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });

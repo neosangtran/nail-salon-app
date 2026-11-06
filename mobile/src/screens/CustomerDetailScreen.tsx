@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   FlatList,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -15,32 +16,43 @@ import LoadingView from '../components/LoadingView';
 import StatusBadge from '../components/StatusBadge';
 import { formatCurrency, formatDate, getInitials } from '../utils/format';
 
-export default function CustomerDetailScreen({ route }: CustomerDetailScreenProps) {
+export default function CustomerDetailScreen({ route, navigation }: CustomerDetailScreenProps) {
   const { customerId } = route.params;
-  const { data: customerData, isLoading } = useCustomer(customerId);
+  const { data: customer, isLoading } = useCustomer(customerId);
   const { data: visitsData } = useCustomerVisits(customerId);
 
-  if (isLoading) return <LoadingView message="Loading customer details..." />;
-  if (!customerData?.customer) return <LoadingView message="Customer not found" />;
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () =>
+        customer ? (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('CustomerForm', { customerId })}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.headerAction}>Edit</Text>
+          </TouchableOpacity>
+        ) : null,
+    });
+  }, [navigation, customer, customerId]);
 
-  const { customer } = customerData;
+  if (isLoading) return <LoadingView message="Loading customer details..." />;
+  if (!customer) return <LoadingView message="Customer not found" />;
+
   const visits = visitsData?.visits ?? [];
 
   const renderVisit = ({ item }: { item: CustomerVisit }) => (
     <View style={styles.visitRow}>
       <View style={styles.visitLeft}>
         <Text style={styles.visitDate}>{formatDate(item.date)}</Text>
-        {item.staff?.name ? (
-          <Text style={styles.visitStaff}>{item.staff.name}</Text>
-        ) : null}
-        {item.services && item.services.length > 0 ? (
+        {item.staffName ? <Text style={styles.visitStaff}>{item.staffName}</Text> : null}
+        {item.serviceName ? (
           <Text style={styles.visitServices} numberOfLines={1}>
-            {item.services.join(', ')}
+            {item.serviceName}
           </Text>
         ) : null}
       </View>
       <View style={styles.visitRight}>
-        <StatusBadge status={item.status as 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no-show'} />
+        <StatusBadge status={item.status} />
         <Text style={styles.visitPrice}>{formatCurrency(item.totalPrice)}</Text>
       </View>
     </View>
@@ -126,6 +138,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
+  headerAction: { fontSize: 16, fontWeight: '600', color: '#e11d48', paddingHorizontal: 4 },
   safe: { flex: 1, backgroundColor: '#f9fafb' },
   content: { padding: 16, paddingBottom: 32 },
   profileCard: {

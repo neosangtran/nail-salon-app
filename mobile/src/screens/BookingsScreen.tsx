@@ -8,6 +8,8 @@ import {
   ListRenderItem,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
+import type { BookingListScreenProps } from '../navigation/types';
 import { useBookings, type Booking, type BookingStatus } from '../hooks/useBookings';
 import StatusBadge from '../components/StatusBadge';
 import LoadingView from '../components/LoadingView';
@@ -18,13 +20,13 @@ type FilterStatus = BookingStatus | 'all';
 
 const FILTERS: { label: string; value: FilterStatus }[] = [
   { label: 'All', value: 'all' },
-  { label: 'Pending', value: 'pending' },
-  { label: 'Confirmed', value: 'confirmed' },
-  { label: 'Completed', value: 'completed' },
-  { label: 'Cancelled', value: 'cancelled' },
+  { label: 'Pending', value: 'PENDING' },
+  { label: 'Confirmed', value: 'CONFIRMED' },
+  { label: 'Completed', value: 'COMPLETED' },
+  { label: 'Cancelled', value: 'CANCELLED' },
 ];
 
-export default function BookingsScreen() {
+export default function BookingsScreen({ navigation }: BookingListScreenProps) {
   const [filter, setFilter] = useState<FilterStatus>('all');
 
   const params = filter === 'all' ? { limit: 50 } : { status: filter as BookingStatus, limit: 50 };
@@ -33,7 +35,11 @@ export default function BookingsScreen() {
   const appointments = data?.appointments ?? [];
 
   const renderItem: ListRenderItem<Booking> = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() => navigation.navigate('BookingForm', { bookingId: item.id })}
+    >
       <View style={styles.cardHeader}>
         <View style={styles.headerLeft}>
           <Text style={styles.customerName}>{item.customer?.name ?? 'Unknown'}</Text>
@@ -68,14 +74,24 @@ export default function BookingsScreen() {
           </View>
         ) : null}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.title}>Bookings</Text>
-        <Text style={styles.count}>{appointments.length} records</Text>
+        <View>
+          <Text style={styles.title}>Bookings</Text>
+          <Text style={styles.count}>{appointments.length} records</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate('BookingForm')}
+          activeOpacity={0.8}
+        >
+          <Feather name="plus" size={18} color="#ffffff" />
+          <Text style={styles.addButtonText}>New</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Filter Tabs */}
@@ -142,7 +158,17 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   title: { fontSize: 22, fontWeight: '700', color: '#111827' },
-  count: { fontSize: 13, color: '#6b7280' },
+  count: { fontSize: 13, color: '#6b7280', marginTop: 2 },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#e11d48',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  addButtonText: { color: '#ffffff', fontSize: 14, fontWeight: '600' },
   filterContainer: { paddingBottom: 8 },
   filterList: { paddingHorizontal: 16, gap: 8 },
   filterChip: {
