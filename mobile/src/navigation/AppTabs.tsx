@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
 import type { AppTabsParamList } from './types';
 import DashboardScreen from '../screens/DashboardScreen';
-import BookingsScreen from '../screens/BookingsScreen';
+import BookingStack from './BookingStack';
 import StaffStack from './StaffStack';
 import CustomerStack from './CustomerStack';
 import MoreStack from './MoreStack';
@@ -39,7 +39,7 @@ export default function AppTabs() {
       />
       <Tab.Screen
         name="Bookings"
-        component={BookingsScreen}
+        component={BookingStack}
         options={{
           tabBarIcon: ({ color, size }) => <Feather name="calendar" size={size} color={color} />,
         }}

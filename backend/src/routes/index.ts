@@ -7,6 +7,7 @@ import revenueRouter from './revenue';
 import suppliesRouter from './supplies';
 import bookingsRouter from './bookings';
 import commissionsRouter from './commissions';
+import servicesRouter from './services';
 
 const router = Router();
 
@@ -44,11 +45,11 @@ router.use('/revenue', revenueRouter);
 router.use('/supplies', suppliesRouter);
 router.use('/bookings', bookingsRouter);
 router.use('/commissions', commissionsRouter);
+router.use('/services', servicesRouter);
 
 // Placeholder route registrations — to be wired in as modules are built
 // router.use('/appointments', appointmentsRouter);
 // router.use('/clients', clientsRouter);
-// router.use('/services', servicesRouter);
 // router.use('/inventory', inventoryRouter);
 // router.use('/reports', reportsRouter);
 

@@ -4,7 +4,8 @@ import axios from 'axios';
 const TOKEN_KEY = 'nail_salon_token';
 
 const api = axios.create({
-  baseURL: 'https://backend-production-212a.up.railway.app/api',
+  // Override with EXPO_PUBLIC_API_URL (e.g. a local backend during development).
+  baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'https://backend-production-212a.up.railway.app/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });
@@ -38,3 +39,9 @@ export const tokenHelpers = {
 };
 
 export default api;
+
+/** Extracts a readable message from an API error ({ success: false, error }). */
+export function getErrorMessage(err: unknown, fallback = 'Something went wrong. Please try again.'): string {
+  const data = (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data;
+  return data?.error ?? data?.message ?? fallback;
+}
